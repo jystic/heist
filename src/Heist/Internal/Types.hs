@@ -24,10 +24,10 @@ module Heist.Internal.Types
 import           Data.HashMap.Strict (HashMap)
 import           Data.Text (Text)
 
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative
 import           Data.Monoid
-#endif
+-- #endif
 
 ------------------------------------------------------------------------------
 import qualified Heist.Compiled.Internal       as C

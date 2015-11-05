@@ -39,9 +39,9 @@ import           Data.Time.Clock
 import           System.Random
 import           Text.XmlHtml
 
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Data.Word (Word)
-#endif
+-- #endif
 
 ------------------------------------------------------------------------------
 import qualified Heist.Compiled.Internal as C

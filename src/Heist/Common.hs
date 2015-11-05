@@ -26,10 +26,10 @@ import qualified Data.Text                as T
 import           Heist.Internal.Types.HeistState
 import           System.FilePath          (pathSeparator)
 import qualified Text.XmlHtml             as X
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative      (Applicative (..), (<$>))
 import           Data.Monoid              (Monoid (..))
-#endif
+-- #endif
 ------------------------------------------------------------------------------
 
 

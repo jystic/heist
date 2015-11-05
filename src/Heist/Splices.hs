@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP               #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Heist.Splices
   ( ifISplice
@@ -13,9 +14,9 @@ module Heist.Splices
   , module Heist.Splices.Markdown
   ) where
 
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Data.Monoid (Monoid(..))
-#endif
+-- #endif
 
 import qualified Heist.Compiled as C
 import qualified Heist.Interpreted as I

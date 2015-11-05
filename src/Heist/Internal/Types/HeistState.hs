@@ -26,11 +26,11 @@ import           Control.Arrow                 (first)
 import           Control.Monad                 (MonadPlus (..), ap)
 import           Control.Monad.Base
 import           Control.Monad.Cont            (MonadCont (..))
-#if MIN_VERSION_mtl(2,2,1)
+-- #if MIN_VERSION_mtl(2,2,1)
 import           Control.Monad.Except          (MonadError (..))
-#else
-import           Control.Monad.Error           (MonadError (..))
-#endif
+-- #else
+-- import           Control.Monad.Error           (MonadError (..))
+-- #endif
 import           Control.Monad.Fix             (MonadFix (..))
 import           Control.Monad.Reader          (MonadReader (..))
 import           Control.Monad.State.Strict    (MonadState (..), StateT)
@@ -46,18 +46,18 @@ import           Data.Map.Syntax
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 import           Data.Text.Encoding            (decodeUtf8)
-#if MIN_VERSION_base (4,7,0)
+-- #if MIN_VERSION_base (4,7,0)
 import           Data.Typeable                 (Typeable)
-#else
-import           Data.Typeable                 (TyCon, Typeable(..),
-                                                Typeable1(..), mkTyCon,
-                                                mkTyConApp)
-#endif
+-- #else
+-- import           Data.Typeable                 (TyCon, Typeable(..),
+--                                                 Typeable1(..), mkTyCon,
+--                                                 mkTyConApp)
+-- #endif
 
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative           (Applicative (..), (<$>))
 import           Data.Monoid                   (Monoid(..))
-#endif
+-- #endif
 
 import qualified Text.XmlHtml                  as X
 ------------------------------------------------------------------------------
@@ -92,9 +92,9 @@ data DocumentFile = DocumentFile
     { dfDoc  :: X.Document
     , dfFile :: Maybe FilePath
     } deriving ( Eq
-#if MIN_VERSION_base(4,7,0)
+-- #if MIN_VERSION_base(4,7,0)
                , Typeable
-#endif
+-- #endif
                )
 
 
@@ -113,9 +113,9 @@ newtype RuntimeSplice m a = RuntimeSplice {
                , MonadIO
                , MonadState HeterogeneousEnvironment
                , MonadTrans
-#if MIN_VERSION_base(4,7,0)
+-- #if MIN_VERSION_base(4,7,0)
                , Typeable
-#endif
+-- #endif
                )
 
 
@@ -137,9 +137,9 @@ data Chunk m = Pure !ByteString
                -- ^ output computed at run time
              | RuntimeAction !(RuntimeSplice m ())
                -- ^ runtime action used only for its side-effect
-#if MIN_VERSION_base(4,7,0)
+-- #if MIN_VERSION_base(4,7,0)
              deriving Typeable
-#endif
+-- #endif
 
 instance Show (Chunk m) where
     show (Pure _) = "Pure"
@@ -219,22 +219,22 @@ data HeistState m = HeistState {
     -- correspond to a bound splice.  When not using a namespace, this flag is
     -- ignored.
     , _errorNotBound       :: Bool
-#if MIN_VERSION_base(4,7,0)
+-- #if MIN_VERSION_base(4,7,0)
 } deriving (Typeable)
-#else
-}
-#endif
+-- #else
+-- }
+-- #endif
 
-#if !MIN_VERSION_base(4,7,0)
--- NOTE: We got rid of the Monoid instance because it is absolutely not safe
--- to combine two compiledTemplateMaps.  All compiled templates must be known
--- at load time and processed in a single call to initHeist/loadTemplates or
--- whatever we end up calling it..
-
-instance (Typeable1 m) => Typeable (HeistState m) where
-    typeOf _ = mkTyConApp templateStateTyCon [typeOf1 (undefined :: m ())]
-
-#endif
+-- #if !MIN_VERSION_base(4,7,0)
+-- -- NOTE: We got rid of the Monoid instance because it is absolutely not safe
+-- -- to combine two compiledTemplateMaps.  All compiled templates must be known
+-- -- at load time and processed in a single call to initHeist/loadTemplates or
+-- -- whatever we end up calling it..
+-- 
+-- instance (Typeable1 m) => Typeable (HeistState m) where
+--     typeOf _ = mkTyConApp templateStateTyCon [typeOf1 (undefined :: m ())]
+-- 
+-- #endif
 
 ------------------------------------------------------------------------------
 -- | HeistT is the monad transformer used for splice processing.  HeistT
@@ -254,11 +254,11 @@ newtype HeistT n m a = HeistT {
     runHeistT :: X.Node
               -> HeistState n
               -> m (a, HeistState n)
-#if MIN_VERSION_base(4,7,0)
+-- #if MIN_VERSION_base(4,7,0)
 } deriving Typeable
-#else
-}
-#endif
+-- #else
+-- }
+-- #endif
 
 
 ------------------------------------------------------------------------------
@@ -285,14 +285,14 @@ compiledSpliceNames :: HeistState m -> [Text]
 compiledSpliceNames ts = H.keys $ _compiledSpliceMap ts
 
 
-#if !MIN_VERSION_base(4,7,0)
-------------------------------------------------------------------------------
--- | The Typeable instance is here so Heist can be dynamically executed with
--- Hint.
-templateStateTyCon :: TyCon
-templateStateTyCon = mkTyCon "Heist.HeistState"
-{-# NOINLINE templateStateTyCon #-}
-#endif
+-- #if !MIN_VERSION_base(4,7,0)
+-- ------------------------------------------------------------------------------
+-- -- | The Typeable instance is here so Heist can be dynamically executed with
+-- -- Hint.
+-- templateStateTyCon :: TyCon
+-- templateStateTyCon = mkTyCon "Heist.HeistState"
+-- {-# NOINLINE templateStateTyCon #-}
+-- #endif
 
 
 ------------------------------------------------------------------------------
@@ -349,7 +349,7 @@ instance MonadTrans (HeistT n) where
 instance MonadBase b m => MonadBase b (HeistT n m) where
     liftBase = lift . liftBase
 
-#if MIN_VERSION_monad_control(1,0,0)
+-- #if MIN_VERSION_monad_control(1,0,0)
 instance MonadTransControl (HeistT n) where
     type StT (HeistT n) a = (a, HeistState n)
     liftWith f = HeistT $ \n s -> do
@@ -366,24 +366,24 @@ instance MonadBaseControl b m => MonadBaseControl b (HeistT n m) where
      restoreM = defaultRestoreM
      {-# INLINE liftBaseWith #-}
      {-# INLINE restoreM #-}
-#else
-instance MonadTransControl (HeistT n) where
-    newtype StT (HeistT n) a = StHeistT {unStHeistT :: (a, HeistState n)}
-    liftWith f = HeistT $ \n s -> do
-        res <- f $ \(HeistT g) -> liftM StHeistT $ g n s
-        return (res, s)
-    restoreT k = HeistT $ \_ _ -> liftM unStHeistT k
-    {-# INLINE liftWith #-}
-    {-# INLINE restoreT #-}
-
-
-instance MonadBaseControl b m => MonadBaseControl b (HeistT n m) where
-     newtype StM (HeistT n m) a = StMHeist {unStMHeist :: ComposeSt (HeistT n) m a}
-     liftBaseWith = defaultLiftBaseWith StMHeist
-     restoreM = defaultRestoreM unStMHeist
-     {-# INLINE liftBaseWith #-}
-     {-# INLINE restoreM #-}
-#endif
+-- #else
+-- instance MonadTransControl (HeistT n) where
+--     newtype StT (HeistT n) a = StHeistT {unStHeistT :: (a, HeistState n)}
+--     liftWith f = HeistT $ \n s -> do
+--         res <- f $ \(HeistT g) -> liftM StHeistT $ g n s
+--         return (res, s)
+--     restoreT k = HeistT $ \_ _ -> liftM unStHeistT k
+--     {-# INLINE liftWith #-}
+--     {-# INLINE restoreT #-}
+-- 
+-- 
+-- instance MonadBaseControl b m => MonadBaseControl b (HeistT n m) where
+--      newtype StM (HeistT n m) a = StMHeist {unStMHeist :: ComposeSt (HeistT n) m a}
+--      liftBaseWith = defaultLiftBaseWith StMHeist
+--      restoreM = defaultRestoreM unStMHeist
+--      {-# INLINE liftBaseWith #-}
+--      {-# INLINE restoreM #-}
+-- #endif
 
 ------------------------------------------------------------------------------
 -- | MonadFix passthrough instance
@@ -467,17 +467,17 @@ instance (MonadCont m) => MonadCont (HeistT n m) where
     callCC = _liftCallCC callCC
 
 
-#if !MIN_VERSION_base(4,7,0)
-------------------------------------------------------------------------------
--- | The Typeable instance is here so Heist can be dynamically executed with
--- Hint.
-templateMonadTyCon :: TyCon
-templateMonadTyCon = mkTyCon "Heist.HeistT"
-{-# NOINLINE templateMonadTyCon #-}
-
-instance (Typeable1 m) => Typeable1 (HeistT n m) where
-    typeOf1 _ = mkTyConApp templateMonadTyCon [typeOf1 (undefined :: m ())]
-#endif
+-- #if !MIN_VERSION_base(4,7,0)
+-- ------------------------------------------------------------------------------
+-- -- | The Typeable instance is here so Heist can be dynamically executed with
+-- -- Hint.
+-- templateMonadTyCon :: TyCon
+-- templateMonadTyCon = mkTyCon "Heist.HeistT"
+-- {-# NOINLINE templateMonadTyCon #-}
+-- 
+-- instance (Typeable1 m) => Typeable1 (HeistT n m) where
+--     typeOf1 _ = mkTyConApp templateMonadTyCon [typeOf1 (undefined :: m ())]
+-- #endif
 
 
 ------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP                #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RecordWildCards    #-}
+{-# LANGUAGE OverloadedStrings  #-}
 {-| The \"markdown\" splice formats markdown content as HTML and inserts
 it into the document.
 
@@ -113,9 +114,9 @@ import           System.IO
 import           System.Process
 import           Text.XmlHtml
 
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Control.Applicative             ((<$>))
-#endif
+-- #endif
 
 ------------------------------------------------------------------------------
 import           Heist.Common

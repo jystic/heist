@@ -33,9 +33,9 @@ import qualified Data.Vector                        as V
 import qualified Text.XmlHtml                       as X
 import qualified Text.XmlHtml.HTML.Meta             as X
 ------------------------------------------------------------------------------
-#if !MIN_VERSION_base(4,8,0)
+-- #if !MIN_VERSION_base(4,8,0)
 import           Data.Foldable                      (Foldable)
-#endif
+-- #endif
 import qualified Data.Foldable                      as Foldable
 ------------------------------------------------------------------------------
 import           Heist.Common
