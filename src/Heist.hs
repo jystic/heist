@@ -44,6 +44,7 @@ module Heist
 
   -- * Lenses (can be used with lens or lens-family)
   , scInterpretedSplices
+  , scDefaultSplice
   , scLoadTimeSplices
   , scCompiledSplices
   , scAttributeSplices
@@ -52,6 +53,7 @@ module Heist
   , hcNamespace
   , hcErrorNotBound
   , hcInterpretedSplices
+  , hcDefaultSplice
   , hcLoadTimeSplices
   , hcCompiledSplices
   , hcAttributeSplices
@@ -203,7 +205,7 @@ addTemplatePathPrefix dir ts
 ------------------------------------------------------------------------------
 -- | Creates an empty HeistState.
 emptyHS :: HE.KeyGen -> HeistState m
-emptyHS kg = HeistState Map.empty Map.empty Map.empty Map.empty Map.empty
+emptyHS kg = HeistState (const Nothing) Map.empty Map.empty Map.empty Map.empty Map.empty
                         True [] 0 [] Nothing kg False Html "" [] False
 
 
@@ -250,7 +252,7 @@ initHeist' :: Monad n
            -> IO (Either [String] (HeistState n))
 initHeist' keyGen (HeistConfig sc ns enn) repo = do
     let empty = emptyHS keyGen
-    let (SpliceConfig i lt c a _) = sc
+    let (SpliceConfig d i lt c a _) = sc
     etmap <- preproc keyGen lt repo ns
     let prefix = mkSplicePrefix ns
     let eis = runHashMap $ mapK (prefix<>) i
@@ -261,7 +263,8 @@ initHeist' keyGen (HeistConfig sc ns enn) repo = do
           is <- eis
           cs <- ecs
           as <- eas
-          return $ empty { _spliceMap = is
+          return $ empty { _spliceDefault = d
+                         , _spliceMap = is
                          , _templateMap = tmap
                          , _compiledSpliceMap = cs
                          , _attrSpliceMap = as
@@ -335,7 +338,7 @@ initHeistWithCacheTag (HeistConfig sc ns enn) = do
         case eRawWithCache of
           Left es -> return $ Left es
           Right rawWithCache -> do
-            let sc' = SpliceConfig (tag #! cacheImpl cts) mempty
+            let sc' = SpliceConfig (const Nothing) (tag #! cacheImpl cts) mempty
                                    (tag #! cacheImplCompiled cts) mempty mempty
             let hc = HeistConfig (mappend sc sc') ns enn
             hs <- initHeist' keyGen hc rawWithCache

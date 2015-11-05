@@ -7,6 +7,7 @@ module Heist.Interpreted.Internal where
 
 ------------------------------------------------------------------------------
 import           Blaze.ByteString.Builder
+import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.State.Strict
 import qualified Data.Attoparsec.Text          as AP
@@ -168,12 +169,14 @@ runNode :: Monad n => X.Node -> Splice n
 runNode (X.Element nm at ch) = do
     newAtts <- runAttributes at
     let n = X.Element nm newAtts ch
-    s <- liftM (lookupSplice nm) getHS
-    maybe (runKids newAtts) (recurseSplice n) s
+    s  <- liftM (lookupSplice nm)  getHS
+    ds <- liftM _spliceDefault getHS
+    maybe (runKids newAtts) (recurseSplice n) (s <|> ds n)
   where
     runKids newAtts = do
         newKids <- runNodeList ch
         return [X.Element nm newAtts newKids]
+
 runNode n                    = return [n]
 
 

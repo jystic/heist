@@ -119,6 +119,7 @@ Library
     Heist.Compiled.LowLevel,
     Heist.Internal.Types,
     Heist.Interpreted,
+    Heist.Interpreted.Internal,
     Heist.Splices,
     Heist.Splices.Apply,
     Heist.Splices.Bind,
@@ -128,14 +129,13 @@ Library
     Heist.Splices.Ignore,
     Heist.Splices.Json,
     Heist.Splices.Markdown,
-    Heist.TemplateDirectory
+    Heist.TemplateDirectory,
+    Heist.Internal.Types.HeistState
 
   other-modules:
     Data.HeterogeneousEnvironment,
     Heist.Common,
-    Heist.Compiled.Internal,
-    Heist.Internal.Types.HeistState,
-    Heist.Interpreted.Internal
+    Heist.Compiled.Internal
 
   build-depends:
     aeson                      >= 0.6     && < 0.11,

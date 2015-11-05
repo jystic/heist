@@ -173,8 +173,10 @@ type AttrSplice m = Text -> RuntimeSplice m [(Text, Text)]
 --
 -- m is the runtime monad
 data HeistState m = HeistState {
+    -- | The default splice to use if one is not found in the map
+      _spliceDefault       :: X.Node -> Maybe (HeistT m m Template)
     -- | A mapping of splice names to splice actions
-      _spliceMap           :: HashMap Text (HeistT m m Template)
+    , _spliceMap           :: HashMap Text (HeistT m m Template)
     -- | A mapping of template names to templates
     , _templateMap         :: HashMap TPath DocumentFile
 

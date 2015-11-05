@@ -29,6 +29,7 @@ import           Control.Applicative
 import           Data.Monoid
 -- #endif
 
+import qualified Text.XmlHtml                  as X
 ------------------------------------------------------------------------------
 import qualified Heist.Compiled.Internal       as C
 import qualified Heist.Interpreted.Internal    as I
@@ -57,7 +58,8 @@ lens sa sbt afb s = sbt s <$> afb (sa s)
 -- | The splices and templates Heist will use.  To bind a splice simply
 -- include it in the appropriate place here.
 data SpliceConfig m = SpliceConfig
-    { _scInterpretedSplices :: Splices (I.Splice m)
+    { _scDefaultSplice      :: X.Node -> Maybe (I.Splice m)
+    , _scInterpretedSplices :: Splices (I.Splice m)
         -- ^ Interpreted splices are the splices that Heist has always had.
         -- They return a list of nodes and are processed at runtime.
     , _scLoadTimeSplices    :: Splices (I.Splice IO)
@@ -88,6 +90,16 @@ scInterpretedSplices
 scInterpretedSplices = lens _scInterpretedSplices setter
   where
     setter sc v = sc { _scInterpretedSplices = v }
+
+
+------------------------------------------------------------------------------
+scDefaultSplice
+    :: Functor f
+    => ((X.Node -> Maybe (I.Splice m)) -> f (X.Node -> Maybe (I.Splice m)))
+    -> SpliceConfig m -> f (SpliceConfig m)
+scDefaultSplice = lens _scDefaultSplice setter
+  where
+    setter sc v = sc { _scDefaultSplice = v }
 
 
 ------------------------------------------------------------------------------
@@ -139,10 +151,11 @@ scTemplateLocations = lens _scTemplateLocations setter
 
 
 instance Monoid (SpliceConfig m) where
-    mempty = SpliceConfig mempty mempty mempty mempty mempty
-    mappend (SpliceConfig a1 b1 c1 d1 e1) (SpliceConfig a2 b2 c2 d2 e2) =
-      SpliceConfig (mappend a1 a2) (mappend b1 b2) (mappend c1 c2)
-                   (mappend d1 d2) (mappend e1 e2)
+    mempty = SpliceConfig (const Nothing) mempty mempty mempty mempty mempty
+    mappend (SpliceConfig a1 b1 c1 d1 e1 f1) (SpliceConfig a2 b2 c2 d2 e2 f2) =
+      SpliceConfig (\n -> a1 n <|> a2 n)
+                   (mappend b1 b2) (mappend c1 c2)
+                   (mappend d1 d2) (mappend e1 e2) (mappend f1 f2)
 
 
 data HeistConfig m = HeistConfig
@@ -202,6 +215,14 @@ hcInterpretedSplices
     => (Splices (I.Splice m) -> f (Splices (I.Splice m)))
     -> HeistConfig m -> f (HeistConfig m)
 hcInterpretedSplices = hcSpliceConfig . scInterpretedSplices
+
+
+------------------------------------------------------------------------------
+hcDefaultSplice
+    :: Functor f
+    => ((X.Node -> Maybe (I.Splice m)) -> f (X.Node -> Maybe (I.Splice m)))
+    -> HeistConfig m -> f (HeistConfig m)
+hcDefaultSplice = hcSpliceConfig . scDefaultSplice
 
 
 ------------------------------------------------------------------------------
